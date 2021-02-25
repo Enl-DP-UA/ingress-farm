@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Ingress Portal Farm Calculator (Offline)</title>
@@ -108,7 +108,7 @@
                 }
             }
 
-            var heatsinkSeconds = 300-300*(1 - data.hs.reduce(function (previous, current, index) {
+            var heatsinkSeconds = 90-90*(1 - data.hs.reduce(function (previous, current, index) {
                 if (index != maxHsIndex) {
                     return previous * (1 - (current / 2));
                 }
