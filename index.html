@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Ingress Portal Farm Calculator (Offline)</title>
+    <meta charset="utf-8" />
+    <style>
+        body {
+            text-align:center;
+        }
+        select, .mods-selector {
+            display:inline;
+            margin: 1em;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select mods for each slot:</h1>
+    <select size="7">
+        <option value="6" selected>None</option>
+        <option value="0">Common HeatSink</option>
+        <option value="1">Rare HeatSink</option>
+        <option value="2">Very Rare HeatSink</option>
+        <option value="3">Common MultiHack</option>
+        <option value="4">Rare MultiHack</option>
+        <option value="5">Very Rare MultiHack</option>
+    </select>
+    <select size="7">
+        <option value="6" selected>None</option>
+        <option value="0">Common HeatSink</option>
+        <option value="1">Rare HeatSink</option>
+        <option value="2">Very Rare HeatSink</option>
+        <option value="3">Common MultiHack</option>
+        <option value="4">Rare MultiHack</option>
+        <option value="5">Very Rare MultiHack</option>
+    </select>
+    <select size="7">
+        <option value="6" selected>None</option>
+        <option value="0">Common HeatSink</option>
+        <option value="1">Rare HeatSink</option>
+        <option value="2">Very Rare HeatSink</option>
+        <option value="3">Common MultiHack</option>
+        <option value="4">Rare MultiHack</option>
+        <option value="5">Very Rare MultiHack</option>
+    </select>
+    <select size="7">
+        <option value="6" selected>None</option>
+        <option value="0">Common HeatSink</option>
+        <option value="1">Rare HeatSink</option>
+        <option value="2">Very Rare HeatSink</option>
+        <option value="3">Common MultiHack</option>
+        <option value="4">Rare MultiHack</option>
+        <option value="5">Very Rare MultiHack</option>
+    </select>
+    <p id="hacks"></p>
+    <p id="cooldown"></p>
+    <p id="burnout"></p>
+    <script>
+        "use strict";
+
+        var selects = document.getElementsByTagName("select");
+
+        (function doOnChangeHandlers() {
+            for (var i=0; i<selects.length; i++){
+                selects[i].onchange = showStats;
+            }
+        })();
+
+        function gatherData() {
+            var stats = [
+            0.2,
+            0.5,
+            0.7,
+            4,
+            8,
+            12
+            ];
+            var installedmods = { hs:[], mh:[] };
+            for (var i = 0; i < 4; i++) {
+                if (selects[i].value == 6) continue;
+                if (selects[i].value >= 0 && selects[i].value <= 2) {
+                    installedmods.hs.push(stats[selects[i].value]);
+                }
+                else {
+                    installedmods.mh.push(stats[selects[i].value]);
+                }
+            }
+            return installedmods;
+        }
+
+        function calculate() {
+
+            var data = gatherData(),
+            maxHsIndex = 0,
+            maxMhIndex = 0,
+            maxvalue = 0;
+
+            for (var i = 0; i < data.hs.length; i++) {
+                if (maxvalue < data.hs[i]) {
+                    maxvalue = data.hs[i];
+                    maxHsIndex = i;
+                }
+            }
+            for (var i = 0; i < data.mh.length; i++) {
+                if (maxvalue < data.mh[i]) {
+                    maxvalue = data.mh[i];
+                    maxMhIndex = i;
+                }
+            }
+
+            var heatsinkSeconds = 300-300*(1 - data.hs.reduce(function (previous, current, index) {
+                if (index != maxHsIndex) {
+                    return previous * (1 - (current / 2));
+                }
+                return previous * (1 - current);
+            }, 1));
+
+            var hacks = 4 + data.mh.reduce(function (previous, current, index) {
+                if (index != maxMhIndex) {
+                    return previous + (current / 2);
+                }
+                return previous + current;
+            }, 0);
+            return { heatsinkSeconds, hacks };
+        }
+
+        function showStats() {
+            var stats = calculate(),
+            hacksOut = document.getElementById("hacks"),
+            cooldownOut = document.getElementById("cooldown"),
+            burnoutOut = document.getElementById("burnout");
+            hacksOut.innerHTML = stats.hacks + " hacks before burnout;";
+            cooldownOut.innerHTML = Math.round(stats.heatsinkSeconds) + " seconds between hacks;";
+            var minutes = ~~((stats.hacks-1)*stats.heatsinkSeconds/60);
+            var seconds = ~~(((stats.hacks-1)*stats.heatsinkSeconds)%60);
+            burnoutOut.innerHTML= "At least " + minutes + " minutes " + (seconds?(seconds+" seconds"):"") + " for burnout.";
+        }
+
+        showStats();
+    </script>
+</body>
+</html>
